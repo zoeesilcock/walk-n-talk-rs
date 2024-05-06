@@ -1,9 +1,10 @@
-use bevy::{prelude::*, window::WindowResolution};
-use std::time::Duration;
-
-use animation::{Animation, AnimationPlugin};
-
 mod animation;
+mod person;
+
+use bevy::{prelude::*, window::WindowResolution};
+
+use animation::AnimationPlugin;
+use person::PersonBundle;
 
 fn main() {
     App::new()
@@ -30,10 +31,6 @@ struct Background;
 #[derive(Component)]
 struct Player;
 
-const IDLE_FRAMES: &[usize] = &[0];
-const WALKING_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
-
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -59,15 +56,10 @@ fn setup(
 
     commands.spawn((
         Player,
-        Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION),
-        SpriteSheetBundle {
-            texture: person_texture,
-            atlas: TextureAtlas {
-                layout: texture_atlas_layout,
-                index: IDLE_FRAMES[0],
-            },
-            transform: Transform::from_xyz(0., 0., 0.),
-            ..default()
-        },
+        PersonBundle::new(
+            person_texture.clone(),
+            texture_atlas_layout.clone(),
+            Transform::from_xyz(0., 0., 0.),
+        ),
     ));
 }
