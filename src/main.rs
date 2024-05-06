@@ -1,9 +1,11 @@
 mod animation;
+mod movable;
 mod person;
 
 use bevy::{prelude::*, window::WindowResolution};
 
 use animation::AnimationPlugin;
+use movable::{Movable, MovablePlugin, Velocity};
 use person::PersonBundle;
 
 fn main() {
@@ -21,6 +23,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .add_plugins(AnimationPlugin)
+        .add_plugins(MovablePlugin)
         .add_systems(Startup, setup)
         .run()
 }
@@ -36,7 +39,7 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let origin_transform = Transform::from_xyz(0., 18., 0.);
+    let origin_transform = Transform::from_xyz(0., 18., -10.);
     let mut camera = Camera2dBundle::default();
     camera.transform = origin_transform;
     commands.spawn(camera);
@@ -61,5 +64,13 @@ fn setup(
             texture_atlas_layout.clone(),
             Transform::from_xyz(0., 0., 0.),
         ),
+        Movable,
+        Velocity { x: 0., y: 0. },
+    ));
+
+    commands.spawn(PersonBundle::new(
+        person_texture.clone(),
+        texture_atlas_layout.clone(),
+        Transform::from_xyz(50., 0., 0.),
     ));
 }
