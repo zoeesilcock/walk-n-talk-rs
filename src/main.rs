@@ -1,4 +1,9 @@
 use bevy::{prelude::*, window::WindowResolution};
+use std::time::Duration;
+
+use animation::{Animation, AnimationPlugin};
+
+mod animation;
 
 fn main() {
     App::new()
@@ -14,7 +19,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
         )
-        .add_systems(Update, animate_sprite)
+        .add_plugins(AnimationPlugin)
         .add_systems(Startup, setup)
         .run()
 }
@@ -25,14 +30,9 @@ struct Background;
 #[derive(Component)]
 struct Player;
 
-#[derive(Component)]
-struct AnimationIndices {
-    first: usize,
-    last: usize,
-}
-
-#[derive(Component, Deref, DerefMut)]
-struct AnimationTimer(Timer);
+const IDLE_FRAMES: &[usize] = &[0];
+const WALKING_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
 
 fn setup(
     mut commands: Commands,
@@ -56,37 +56,18 @@ fn setup(
     let person_texture = asset_server.load("person.png");
     let person_layout = TextureAtlasLayout::from_grid(Vec2::new(32., 32.), 11, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(person_layout);
-    let idle_indices = AnimationIndices { first: 0, last: 0 };
-    let walk_indices = AnimationIndices { first: 1, last: 10 };
 
     commands.spawn((
         Player,
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION),
         SpriteSheetBundle {
             texture: person_texture,
             atlas: TextureAtlas {
                 layout: texture_atlas_layout,
-                index: walk_indices.first,
+                index: IDLE_FRAMES[0],
             },
             transform: Transform::from_xyz(0., 0., 0.),
             ..default()
         },
-        walk_indices,
     ));
-}
-
-fn animate_sprite(
-    time: Res<Time>,
-    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
-) {
-    for (indices, mut timer, mut atlas) in &mut query {
-        timer.tick(time.delta());
-        if timer.just_finished() {
-            atlas.index = if atlas.index == indices.last {
-                indices.first
-            } else {
-                atlas.index + 1
-            };
-        }
-    }
 }
