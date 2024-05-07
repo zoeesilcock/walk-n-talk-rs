@@ -1,12 +1,14 @@
 mod animation;
 mod movable;
 mod person;
+mod player;
 
 use bevy::{prelude::*, window::WindowResolution};
 
 use animation::AnimationPlugin;
-use movable::{Movable, MovablePlugin, Velocity};
-use person::PersonBundle;
+use movable::MovablePlugin;
+use person::PersonPlugin;
+use player::PlayerPlugin;
 
 fn main() {
     App::new()
@@ -24,6 +26,8 @@ fn main() {
         )
         .add_plugins(AnimationPlugin)
         .add_plugins(MovablePlugin)
+        .add_plugins(PersonPlugin)
+        .add_plugins(PlayerPlugin)
         .add_systems(Startup, setup)
         .run()
 }
@@ -31,14 +35,7 @@ fn main() {
 #[derive(Component)]
 struct Background;
 
-#[derive(Component)]
-struct Player;
-
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let origin_transform = Transform::from_xyz(0., 18., -10.);
     let mut camera = Camera2dBundle::default();
     camera.transform = origin_transform;
@@ -51,26 +48,5 @@ fn setup(
             transform: origin_transform,
             ..default()
         },
-    ));
-
-    let person_texture = asset_server.load("person.png");
-    let person_layout = TextureAtlasLayout::from_grid(Vec2::new(32., 32.), 11, 1, None, None);
-    let texture_atlas_layout = texture_atlas_layouts.add(person_layout);
-
-    commands.spawn((
-        Player,
-        PersonBundle::new(
-            person_texture.clone(),
-            texture_atlas_layout.clone(),
-            Transform::from_xyz(0., 0., 0.),
-        ),
-        Movable,
-        Velocity { x: 0., y: 0. },
-    ));
-
-    commands.spawn(PersonBundle::new(
-        person_texture.clone(),
-        texture_atlas_layout.clone(),
-        Transform::from_xyz(50., 0., 0.),
     ));
 }
