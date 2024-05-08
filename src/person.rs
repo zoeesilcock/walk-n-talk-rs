@@ -24,7 +24,8 @@ pub struct PersonPlugin;
 impl Plugin for PersonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, update);
+        app.add_systems(Update, update_direction);
+        app.add_systems(Update, update_animation);
     }
 }
 
@@ -46,23 +47,23 @@ fn setup(
         layout,
     });
 }
-
-fn update(
-    mut commands: Commands,
-    person_assets: Res<PersonAssets>,
-    mut query: Query<
-        (Entity, &Direction, &mut Sprite, &Velocity, &Animation),
-        (With<Person>, Or<(Changed<Velocity>, Changed<Direction>)>),
-    >,
+fn update_direction(
+    mut query: Query<(&Direction, &mut Sprite), (With<Person>, Changed<Direction>)>,
 ) {
-    for (person, direction, mut sprite, velocity, animation) in query.iter_mut() {
-        // Update direction.
+    for (direction, mut sprite) in query.iter_mut() {
         match direction {
             Direction::Right => sprite.flip_x = false,
             Direction::Left => sprite.flip_x = true,
         }
+    }
+}
 
-        // Update animation.
+fn update_animation(
+    mut commands: Commands,
+    person_assets: Res<PersonAssets>,
+    mut query: Query<(Entity, &Velocity, &Animation), (With<Person>, Changed<Velocity>)>,
+) {
+    for (person, velocity, animation) in query.iter_mut() {
         if velocity.x != 0. && animation.name == IDLE_ANIMATION_NAME {
             commands
                 .entity(person)
