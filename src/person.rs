@@ -5,7 +5,7 @@ use crate::animation::Animation;
 use crate::movable::{Movable, Velocity};
 
 const IDLE_FRAMES: &[usize] = &[0];
-const WALKING_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
 
 #[derive(Resource)]
@@ -19,6 +19,7 @@ pub struct PersonPlugin;
 impl Plugin for PersonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
+        app.add_systems(Update, update);
     }
 }
 
@@ -34,13 +35,47 @@ fn setup(
     commands.insert_resource(PersonAssets { texture, layout });
 }
 
+fn update(
+    mut commands: Commands,
+    mut query: Query<
+        (Entity, &Direction, &mut Sprite, &Velocity, &Animation),
+        (With<Person>, Or<(Changed<Velocity>, Changed<Direction>)>),
+    >,
+) {
+    for (person, direction, mut sprite, velocity, animation) in query.iter_mut() {
+        // Update direction.
+        match direction {
+            Direction::Right => sprite.flip_x = false,
+            Direction::Left => sprite.flip_x = true,
+        }
+
+        // Update animation.
+        if velocity.x != 0. && animation.frames.len() == 1 {
+            commands
+                .entity(person)
+                .insert(Animation::new(WALK_FRAMES, ANIMATION_FRAME_DURATION));
+        } else if velocity.x == 0. && animation.frames.len() > 1 {
+            commands
+                .entity(person)
+                .insert(Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION));
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Person;
+
+#[derive(Component)]
+pub enum Direction {
+    Right,
+    Left,
+}
 
 #[derive(Bundle)]
 pub struct PersonBundle {
     person: Person,
     movable: Movable,
+    direction: Direction,
     velocity: Velocity,
     animation: Animation,
     sprite: SpriteSheetBundle,
@@ -55,6 +90,7 @@ impl PersonBundle {
         Self {
             person: Person,
             movable: Movable,
+            direction: Direction::Right,
             velocity: Velocity { x: 0., y: 0. },
             animation: Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION),
             sprite: SpriteSheetBundle {
