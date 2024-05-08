@@ -4,6 +4,50 @@ use std::time::Duration;
 use crate::animation::Animation;
 use crate::movable::{Movable, Velocity};
 
+#[derive(Component)]
+pub struct Person;
+
+#[derive(Component)]
+pub enum Direction {
+    Right,
+    Left,
+}
+
+#[derive(Bundle)]
+pub struct PersonBundle {
+    person: Person,
+    movable: Movable,
+    direction: Direction,
+    velocity: Velocity,
+    animation: Animation,
+    sprite: SpriteSheetBundle,
+}
+
+impl PersonBundle {
+    pub fn new(
+        texture: Handle<Image>,
+        layout: Handle<TextureAtlasLayout>,
+        transform: Transform,
+    ) -> Self {
+        Self {
+            person: Person,
+            movable: Movable,
+            direction: Direction::Right,
+            velocity: Velocity { x: 0., y: 0. },
+            animation: Animation::new(IDLE_ANIMATION_NAME, IDLE_FRAMES, ANIMATION_FRAME_DURATION),
+            sprite: SpriteSheetBundle {
+                texture,
+                atlas: TextureAtlas {
+                    layout,
+                    index: IDLE_FRAMES[0],
+                },
+                transform,
+                ..default()
+            },
+        }
+    }
+}
+
 const IDLE_FRAMES: &[usize] = &[0];
 const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
@@ -72,50 +116,6 @@ fn update_animation(
             commands
                 .entity(person)
                 .insert(person_assets.idle_animation.clone());
-        }
-    }
-}
-
-#[derive(Component)]
-pub struct Person;
-
-#[derive(Component)]
-pub enum Direction {
-    Right,
-    Left,
-}
-
-#[derive(Bundle)]
-pub struct PersonBundle {
-    person: Person,
-    movable: Movable,
-    direction: Direction,
-    velocity: Velocity,
-    animation: Animation,
-    sprite: SpriteSheetBundle,
-}
-
-impl PersonBundle {
-    pub fn new(
-        texture: Handle<Image>,
-        layout: Handle<TextureAtlasLayout>,
-        transform: Transform,
-    ) -> Self {
-        Self {
-            person: Person,
-            movable: Movable,
-            direction: Direction::Right,
-            velocity: Velocity { x: 0., y: 0. },
-            animation: Animation::new(IDLE_ANIMATION_NAME, IDLE_FRAMES, ANIMATION_FRAME_DURATION),
-            sprite: SpriteSheetBundle {
-                texture,
-                atlas: TextureAtlas {
-                    layout,
-                    index: IDLE_FRAMES[0],
-                },
-                transform,
-                ..default()
-            },
         }
     }
 }
