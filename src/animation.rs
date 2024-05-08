@@ -1,15 +1,17 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Animation {
+    pub name: &'static str,
     pub frames: &'static [usize],
     pub timer: Timer,
 }
 
 impl Animation {
-    pub fn new(frames: &'static [usize], duration: Duration) -> Self {
+    pub fn new(name: &'static str, frames: &'static [usize], duration: Duration) -> Self {
         Self {
+            name,
             frames,
             timer: Timer::new(duration, TimerMode::Repeating),
         }

@@ -8,10 +8,15 @@ const IDLE_FRAMES: &[usize] = &[0];
 const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
 
+const IDLE_ANIMATION_NAME: &str = "IDLING";
+const WALK_ANIMATION_NAME: &str = "WALKING";
+
 #[derive(Resource)]
 pub struct PersonAssets {
     pub texture: Handle<Image>,
     pub layout: Handle<TextureAtlasLayout>,
+    pub idle_animation: Animation,
+    pub walk_animation: Animation,
 }
 
 pub struct PersonPlugin;
@@ -31,12 +36,20 @@ fn setup(
     let texture = asset_server.load("person.png");
     let texture_layout = TextureAtlasLayout::from_grid(Vec2::new(32., 32.), 11, 1, None, None);
     let layout = texture_asset_layouts.add(texture_layout);
+    let idle_animation = Animation::new(IDLE_ANIMATION_NAME, IDLE_FRAMES, ANIMATION_FRAME_DURATION);
+    let walk_animation = Animation::new(WALK_ANIMATION_NAME, WALK_FRAMES, ANIMATION_FRAME_DURATION);
 
-    commands.insert_resource(PersonAssets { texture, layout });
+    commands.insert_resource(PersonAssets {
+        idle_animation,
+        walk_animation,
+        texture,
+        layout,
+    });
 }
 
 fn update(
     mut commands: Commands,
+    person_assets: Res<PersonAssets>,
     mut query: Query<
         (Entity, &Direction, &mut Sprite, &Velocity, &Animation),
         (With<Person>, Or<(Changed<Velocity>, Changed<Direction>)>),
@@ -50,14 +63,14 @@ fn update(
         }
 
         // Update animation.
-        if velocity.x != 0. && animation.frames.len() == 1 {
+        if velocity.x != 0. && animation.name == IDLE_ANIMATION_NAME {
             commands
                 .entity(person)
-                .insert(Animation::new(WALK_FRAMES, ANIMATION_FRAME_DURATION));
-        } else if velocity.x == 0. && animation.frames.len() > 1 {
+                .insert(person_assets.walk_animation.clone());
+        } else if velocity.x == 0. && animation.name == WALK_ANIMATION_NAME {
             commands
                 .entity(person)
-                .insert(Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION));
+                .insert(person_assets.idle_animation.clone());
         }
     }
 }
@@ -92,7 +105,7 @@ impl PersonBundle {
             movable: Movable,
             direction: Direction::Right,
             velocity: Velocity { x: 0., y: 0. },
-            animation: Animation::new(IDLE_FRAMES, ANIMATION_FRAME_DURATION),
+            animation: Animation::new(IDLE_ANIMATION_NAME, IDLE_FRAMES, ANIMATION_FRAME_DURATION),
             sprite: SpriteSheetBundle {
                 texture,
                 atlas: TextureAtlas {
