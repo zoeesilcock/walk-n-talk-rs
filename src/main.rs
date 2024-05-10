@@ -1,4 +1,5 @@
 mod animation;
+mod debug;
 mod movable;
 mod npc;
 mod person;
@@ -7,6 +8,7 @@ mod player;
 use bevy::{prelude::*, window::WindowResolution};
 
 use animation::AnimationPlugin;
+use debug::DebugPlugin;
 use movable::MovablePlugin;
 use npc::NpcPlugin;
 use person::PersonPlugin;
@@ -31,6 +33,7 @@ fn main() {
         .add_plugins(PersonPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(NpcPlugin)
+        .add_plugins(DebugPlugin)
         .add_systems(Startup, setup)
         .run()
 }
