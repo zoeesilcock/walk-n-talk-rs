@@ -1,17 +1,16 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::animation::Animation;
+use crate::animation::{Animated, Animation};
 use crate::movable::{Movable, Velocity};
 
+const IDLE_ID: u32 = 1;
 const IDLE_FRAMES: &[usize] = &[0];
-const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const ANIMATION_FRAME_DURATION: Duration = Duration::from_millis(100);
+const IDLE_RATE: u64 = 100;
 
-const IDLE_ANIMATION_NAME: &str = "IDLING";
-const IDLE_ANIMATION_RATE: u64 = 100;
-const WALK_ANIMATION_NAME: &str = "WALKING";
-const WALK_ANIMATION_RATE: f32 = 3300.;
+const WALK_ID: u32 = 2;
+const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const WALK_RATE: u64 = 3300;
 
 #[derive(Component)]
 pub struct Person;
@@ -28,7 +27,7 @@ pub struct PersonBundle {
     movable: Movable,
     direction: Direction,
     velocity: Velocity,
-    animation: Animation,
+    animated: Animated,
     sprite: SpriteSheetBundle,
 }
 
@@ -43,7 +42,13 @@ impl PersonBundle {
             movable: Movable,
             direction: Direction::Right,
             velocity: Velocity { x: 0., y: 0. },
-            animation: Animation::new(IDLE_ANIMATION_NAME, IDLE_FRAMES, ANIMATION_FRAME_DURATION),
+            animated: Animated::new(
+                IDLE_ID,
+                vec![
+                    Animation::new(IDLE_ID, IDLE_FRAMES, IDLE_RATE),
+                    Animation::new(WALK_ID, WALK_FRAMES, WALK_RATE),
+                ],
+            ),
             sprite: SpriteSheetBundle {
                 texture,
                 atlas: TextureAtlas {
@@ -96,26 +101,24 @@ fn update_direction(
 }
 
 fn update_animation(
-    mut query: Query<(&Velocity, &mut Animation), (With<Person>, Changed<Velocity>)>,
+    mut query: Query<(&Velocity, &mut Animated), (With<Person>, Changed<Velocity>)>,
 ) {
-    for (velocity, mut animation) in query.iter_mut() {
+    for (velocity, mut animated) in query.iter_mut() {
         // Update which animation is playing.
-        if velocity.x != 0. && animation.name == IDLE_ANIMATION_NAME {
-            animation.name = WALK_ANIMATION_NAME;
-            animation.frames = WALK_FRAMES;
-        } else if velocity.x == 0. && animation.name == WALK_ANIMATION_NAME {
-            animation.name = IDLE_ANIMATION_NAME;
-            animation.frames = IDLE_FRAMES;
-            animation
+        if velocity.x != 0. && animated.current_animation == IDLE_ID {
+            animated.current_animation = WALK_ID;
+        } else if velocity.x == 0. && animated.current_animation == WALK_ID {
+            animated.current_animation = IDLE_ID;
+            animated
                 .timer
-                .set_duration(Duration::from_millis(IDLE_ANIMATION_RATE));
+                .set_duration(Duration::from_millis(IDLE_RATE));
             return;
         }
 
         // Update the rate of the walk animation.
-        if animation.name == WALK_ANIMATION_NAME {
-            animation.timer.set_duration(Duration::from_millis(
-                (WALK_ANIMATION_RATE / velocity.x.abs()) as u64,
+        if animated.current_animation == WALK_ID {
+            animated.timer.set_duration(Duration::from_millis(
+                (WALK_RATE as f32 / velocity.x.abs()) as u64,
             ));
         }
     }
