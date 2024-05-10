@@ -36,11 +36,12 @@ impl PersonBundle {
         texture: Handle<Image>,
         layout: Handle<TextureAtlasLayout>,
         transform: Transform,
+        direction: Direction,
     ) -> Self {
         Self {
             person: Person,
             movable: Movable,
-            direction: Direction::Right,
+            direction,
             velocity: Velocity { x: 0., y: 0. },
             animated: Animated::new(
                 IDLE_ID,

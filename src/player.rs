@@ -19,13 +19,8 @@ fn setup(mut commands: Commands, person_assets: Res<PersonAssets>) {
             person_assets.texture.clone(),
             person_assets.layout.clone(),
             Transform::from_xyz(0., 0., 0.),
+            Direction::Right,
         ),
-    ));
-
-    commands.spawn(PersonBundle::new(
-        person_assets.texture.clone(),
-        person_assets.layout.clone(),
-        Transform::from_xyz(50., 0., 0.),
     ));
 }
 
