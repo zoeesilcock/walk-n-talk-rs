@@ -15,7 +15,7 @@ const WALK_RATE: u64 = 3300;
 #[derive(Component)]
 pub struct Person;
 
-#[derive(Component)]
+#[derive(Component, PartialEq, Eq)]
 pub enum Direction {
     Right,
     Left,
@@ -74,7 +74,7 @@ pub struct PersonPlugin;
 impl Plugin for PersonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Update, update_direction);
+        app.add_systems(Update, (update_direction, update_sprite_direction).chain());
         app.add_systems(Update, update_animation);
     }
 }
@@ -90,7 +90,20 @@ fn setup(
 
     commands.insert_resource(PersonAssets { texture, layout });
 }
+
 fn update_direction(
+    mut query: Query<(&mut Direction, &Velocity), (With<Person>, Changed<Velocity>)>,
+) {
+    for (mut direction, velocity) in query.iter_mut() {
+        if velocity.x > 0. && direction.as_ref() == &Direction::Left {
+            *direction = Direction::Right;
+        } else if velocity.x < 0. && direction.as_ref() == &Direction::Right {
+            *direction = Direction::Left;
+        }
+    }
+}
+
+fn update_sprite_direction(
     mut query: Query<(&Direction, &mut Sprite), (With<Person>, Changed<Direction>)>,
 ) {
     for (direction, mut sprite) in query.iter_mut() {
@@ -113,7 +126,7 @@ fn update_animation(
             animated
                 .timer
                 .set_duration(Duration::from_millis(IDLE_RATE));
-            return;
+            continue;
         }
 
         // Update the rate of the walk animation.

@@ -29,12 +29,8 @@ const MOVEMENT_SPEED: f32 = 36.;
 #[derive(Component)]
 pub struct Player;
 
-fn handle_input(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut Velocity), With<Player>>,
-) {
-    let (player, mut velocity) = query.single_mut();
+fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut query: Query<&mut Velocity, With<Player>>) {
+    let mut velocity = query.single_mut();
     let right_pressed = keys.pressed(KeyCode::ArrowRight);
     let left_pressed = keys.pressed(KeyCode::ArrowLeft);
 
@@ -42,13 +38,11 @@ fn handle_input(
         || (keys.just_released(KeyCode::ArrowLeft) && right_pressed)
     {
         // Move right.
-        commands.entity(player).insert(Direction::Right);
         velocity.x = MOVEMENT_SPEED;
     } else if keys.just_pressed(KeyCode::ArrowLeft)
         || (keys.just_released(KeyCode::ArrowRight) && left_pressed)
     {
         // Move left.
-        commands.entity(player).insert(Direction::Left);
         velocity.x = -MOVEMENT_SPEED;
     } else if velocity.x != 0. && !right_pressed && !left_pressed {
         // Reset velocity.
