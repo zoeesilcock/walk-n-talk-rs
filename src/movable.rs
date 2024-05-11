@@ -9,6 +9,12 @@ pub struct Velocity {
     pub y: f32,
 }
 
+impl Velocity {
+    pub fn default() -> Self {
+        Self { x: 0., y: 0. }
+    }
+}
+
 pub struct MovablePlugin;
 
 impl Plugin for MovablePlugin {

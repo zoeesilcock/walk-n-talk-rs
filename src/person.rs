@@ -37,12 +37,13 @@ impl PersonBundle {
         layout: Handle<TextureAtlasLayout>,
         transform: Transform,
         direction: Direction,
+        velocity: Option<Velocity>,
     ) -> Self {
         Self {
             person: Person,
             movable: Movable,
             direction,
-            velocity: Velocity { x: 0., y: 0. },
+            velocity: velocity.unwrap_or(Velocity { x: 0., y: 0. }),
             animated: Animated::new(
                 IDLE_ID,
                 vec![

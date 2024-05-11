@@ -20,6 +20,7 @@ fn setup(mut commands: Commands, person_assets: Res<PersonAssets>) {
             person_assets.layout.clone(),
             Transform::from_xyz(0., 0., 0.),
             Direction::Right,
+            None,
         ),
     ));
 }
