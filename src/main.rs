@@ -12,7 +12,7 @@ use debug::DebugPlugin;
 use movable::MovablePlugin;
 use npc::NpcPlugin;
 use person::PersonPlugin;
-use player::PlayerPlugin;
+use player::{Player, PlayerPlugin};
 
 fn main() {
     App::new()
@@ -35,6 +35,7 @@ fn main() {
         .add_plugins(NpcPlugin)
         .add_plugins(DebugPlugin)
         .add_systems(Startup, setup)
+        .add_systems(PostUpdate, update_camera_position)
         .run()
 }
 
@@ -55,4 +56,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
     ));
+}
+
+fn update_camera_position(
+    mut query: Query<&mut Transform, With<Camera>>,
+    player_query: Query<&Transform, (With<Player>, Without<Camera>)>,
+) {
+    let player_transform = player_query.single();
+    let mut camera_transform = query.single_mut();
+    camera_transform.translation.x = player_transform.translation.x;
 }
