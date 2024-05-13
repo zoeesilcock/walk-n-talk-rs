@@ -39,6 +39,8 @@ fn main() {
         .run()
 }
 
+const BACKROUND_SCALE: f32 = 4.;
+
 #[derive(Component)]
 struct Background;
 
@@ -50,9 +52,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         Background,
+        ImageScaleMode::Tiled {
+            tile_x: true,
+            tile_y: false,
+            stretch_value: 1. / BACKROUND_SCALE,
+        },
         SpriteBundle {
             texture: asset_server.load("background.png"),
-            transform: origin_transform,
+            transform: origin_transform.with_scale(Vec3 {
+                x: BACKROUND_SCALE,
+                y: 1.,
+                z: 1.,
+            }),
             ..default()
         },
     ));
