@@ -1,3 +1,4 @@
+use crate::interaction::Interactable;
 use crate::movable::Velocity;
 use crate::person::{Direction, PersonAssets, PersonBundle};
 use bevy::prelude::*;
@@ -43,9 +44,10 @@ fn new_npc(
     horizontal_position: f32,
     direction: Direction,
     velocity: Velocity,
-) -> (Npc, PersonBundle) {
+) -> (Npc, Interactable, PersonBundle) {
     (
         Npc::default(),
+        Interactable::talk(),
         PersonBundle::new(
             person_assets.texture.clone(),
             person_assets.layout.clone(),
