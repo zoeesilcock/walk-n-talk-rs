@@ -19,11 +19,13 @@ pub struct Interactable {
     pub interactions: Vec<Interaction>,
 }
 
+#[derive(Clone)]
 pub struct Interaction {
     pub max_distance: f32,
     pub interaction_type: InteractionType,
 }
 
+#[derive(Clone)]
 pub enum InteractionType {
     TALK,
 }
@@ -40,7 +42,9 @@ impl Interactable {
 }
 
 #[derive(Component)]
-pub struct CurrentInteraction;
+pub struct CurrentInteraction {
+    interaction: Interaction,
+}
 
 fn update_visible_interaction(
     mut commands: Commands,
@@ -84,7 +88,9 @@ fn spawn_text(mut commands: Commands, interaction: &Interaction) {
     };
 
     let container = (
-        CurrentInteraction,
+        CurrentInteraction {
+            interaction: interaction.clone(),
+        },
         NodeBundle {
             style: Style {
                 width: Val::Percent(100.0),
@@ -132,12 +138,16 @@ fn handle_input(
     query: Query<&CurrentInteraction>,
     player_query: Query<Entity, (With<Player>, Without<SpeechBubble>)>,
 ) {
-    if let Ok(interaction) = query.get_single() {
+    if let Ok(current_interaction) = query.get_single() {
         if keys.just_pressed(KeyCode::Space) {
-            if let Ok(player) = player_query.get_single() {
-                commands.entity(player).insert(SpeechBubble {
-                    text: "Hello, World!".to_string(),
-                });
+            match current_interaction.interaction.interaction_type {
+                InteractionType::TALK => {
+                    if let Ok(player) = player_query.get_single() {
+                        commands.entity(player).insert(SpeechBubble {
+                            text: "Hello, World!".to_string(),
+                        });
+                    }
+                }
             }
         }
     }
