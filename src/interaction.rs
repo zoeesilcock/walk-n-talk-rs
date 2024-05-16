@@ -1,5 +1,6 @@
 use crate::person::Direction;
 use crate::player::Player;
+use crate::speech_bubble::SpeechBubble;
 use bevy::prelude::*;
 
 const MAX_INTERACTION_DISTANCE: f32 = 12.;
@@ -9,6 +10,7 @@ pub struct InteractionPlugin;
 impl Plugin for InteractionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update_visible_interaction);
+        app.add_systems(Update, handle_input);
     }
 }
 
@@ -122,4 +124,21 @@ fn spawn_text(mut commands: Commands, interaction: &Interaction) {
     let text_id = commands.spawn(text).id();
     commands.entity(container_id).push_children(&[square_id]);
     commands.entity(square_id).push_children(&[text_id]);
+}
+
+fn handle_input(
+    mut commands: Commands,
+    keys: Res<ButtonInput<KeyCode>>,
+    query: Query<&CurrentInteraction>,
+    player_query: Query<Entity, (With<Player>, Without<SpeechBubble>)>,
+) {
+    if let Ok(interaction) = query.get_single() {
+        if keys.just_pressed(KeyCode::Space) {
+            if let Ok(player) = player_query.get_single() {
+                commands.entity(player).insert(SpeechBubble {
+                    text: "Hello, World!".to_string(),
+                });
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@ mod movable;
 mod npc;
 mod person;
 mod player;
+mod speech_bubble;
 
 use bevy::{prelude::*, window::WindowResolution};
 
@@ -15,6 +16,7 @@ use movable::MovablePlugin;
 use npc::NpcPlugin;
 use person::PersonPlugin;
 use player::{Player, PlayerPlugin};
+use speech_bubble::SpeechBubblePlugin;
 
 fn main() {
     App::new()
@@ -36,6 +38,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(NpcPlugin)
         .add_plugins(InteractionPlugin)
+        .add_plugins(SpeechBubblePlugin)
         .add_plugins(DebugPlugin)
         .add_systems(Startup, setup)
         .add_systems(PostUpdate, update_camera_position)
