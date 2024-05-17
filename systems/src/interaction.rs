@@ -1,51 +1,19 @@
-use crate::person::Direction;
-use crate::player::Player;
-use crate::speech_bubble::SpeechBubble;
 use bevy::prelude::*;
-
-const MAX_INTERACTION_DISTANCE: f32 = 12.;
+use components::interaction::{CurrentInteraction, Interactable, Interaction, InteractionType};
+use components::person::Direction;
+use components::player::Player;
+use components::speech_bubble::SpeechBubble;
 
 pub struct InteractionPlugin;
 
 impl Plugin for InteractionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update_visible_interaction);
-        app.add_systems(Update, handle_input);
+        app.add_systems(Update, handle_interaction_input);
     }
 }
 
-#[derive(Component)]
-pub struct Interactable {
-    pub interactions: Vec<Interaction>,
-}
-
-#[derive(Clone)]
-pub struct Interaction {
-    pub max_distance: f32,
-    pub interaction_type: InteractionType,
-}
-
-#[derive(Clone)]
-pub enum InteractionType {
-    TALK,
-}
-
-impl Interactable {
-    pub fn talk() -> Self {
-        Self {
-            interactions: vec![Interaction {
-                max_distance: MAX_INTERACTION_DISTANCE,
-                interaction_type: InteractionType::TALK,
-            }],
-        }
-    }
-}
-
-#[derive(Component)]
-pub struct CurrentInteraction {
-    interaction: Interaction,
-}
-
+#[no_mangle]
 fn update_visible_interaction(
     mut commands: Commands,
     query: Query<(&Interactable, &Transform)>,
@@ -82,6 +50,7 @@ fn update_visible_interaction(
     }
 }
 
+#[no_mangle]
 fn spawn_text(mut commands: Commands, interaction: &Interaction) {
     let text_content = match interaction.interaction_type {
         InteractionType::TALK => "Talk",
@@ -132,7 +101,8 @@ fn spawn_text(mut commands: Commands, interaction: &Interaction) {
     commands.entity(square_id).push_children(&[text_id]);
 }
 
-fn handle_input(
+#[no_mangle]
+fn handle_interaction_input(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     query: Query<&CurrentInteraction>,

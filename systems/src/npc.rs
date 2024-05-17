@@ -1,7 +1,9 @@
-use crate::interaction::Interactable;
-use crate::movable::Velocity;
-use crate::person::{Direction, PersonAssets, PersonBundle};
+use crate::person::PersonBundle;
 use bevy::prelude::*;
+use components::interaction::Interactable;
+use components::movable::Velocity;
+use components::npc::Npc;
+use components::person::{Direction, PersonAssets};
 use rand::{thread_rng, Rng};
 use std::time::Duration;
 
@@ -65,19 +67,7 @@ const MOVEMENT_TIME_TO: u64 = 6000;
 const IDLE_TIME_FROM: u64 = 2000;
 const IDLE_TIME_TO: u64 = 10000;
 
-#[derive(Component)]
-pub struct Npc {
-    timer: Timer,
-}
-
-impl Npc {
-    pub fn default() -> Self {
-        Self {
-            timer: Timer::new(Duration::ZERO, TimerMode::Repeating),
-        }
-    }
-}
-
+#[no_mangle]
 fn update(mut query: Query<(&mut Npc, &mut Velocity, &Direction)>, time: Res<Time>) {
     let mut rng = thread_rng();
 

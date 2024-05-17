@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::animation::{Animated, Animation};
-use crate::movable::{Movable, Velocity};
+use components::animation::{Animated, Animation};
+use components::movable::{Movable, Velocity};
+use components::person::{Direction, Person, PersonAssets};
 
 const IDLE_ID: u32 = 1;
 const IDLE_FRAMES: &[usize] = &[0];
@@ -11,15 +12,6 @@ const IDLE_RATE: u64 = 100;
 const WALK_ID: u32 = 2;
 const WALK_FRAMES: &[usize] = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const WALK_RATE: u64 = 3300;
-
-#[derive(Component)]
-pub struct Person;
-
-#[derive(Component, PartialEq, Eq)]
-pub enum Direction {
-    Right,
-    Left,
-}
 
 #[derive(Bundle)]
 pub struct PersonBundle {
@@ -64,12 +56,6 @@ impl PersonBundle {
     }
 }
 
-#[derive(Resource)]
-pub struct PersonAssets {
-    pub texture: Handle<Image>,
-    pub layout: Handle<TextureAtlasLayout>,
-}
-
 pub struct PersonPlugin;
 
 impl Plugin for PersonPlugin {
@@ -92,6 +78,7 @@ fn setup(
     commands.insert_resource(PersonAssets { texture, layout });
 }
 
+#[no_mangle]
 fn update_direction(
     mut query: Query<(&mut Direction, &Velocity), (With<Person>, Changed<Velocity>)>,
 ) {
@@ -104,6 +91,7 @@ fn update_direction(
     }
 }
 
+#[no_mangle]
 fn update_sprite_direction(
     mut query: Query<(&Direction, &mut Sprite), (With<Person>, Changed<Direction>)>,
 ) {
@@ -115,6 +103,7 @@ fn update_sprite_direction(
     }
 }
 
+#[no_mangle]
 fn update_animation(
     mut query: Query<(&Velocity, &mut Animated), (With<Person>, Changed<Velocity>)>,
 ) {

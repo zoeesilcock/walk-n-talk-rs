@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use components::speech_bubble::{SpeechBubble, SpeechBubbleUI};
 
 pub struct SpeechBubblePlugin;
 
@@ -9,16 +10,7 @@ impl Plugin for SpeechBubblePlugin {
     }
 }
 
-#[derive(Component)]
-pub struct SpeechBubble {
-    pub text: String,
-}
-
-#[derive(Component)]
-pub struct SpeechBubbleUI {
-    pub owner: Entity,
-}
-
+#[no_mangle]
 fn add_new_bubbles(
     mut commands: Commands,
     query: Query<(Entity, &SpeechBubble, &Transform), Added<SpeechBubble>>,
@@ -28,6 +20,7 @@ fn add_new_bubbles(
     }
 }
 
+// #[no_mangle]
 // fn remove_bubbles(
 //     mut commands: Commands,
 //     mut removals: RemovedComponents<SpeechBubble>,
@@ -37,6 +30,7 @@ fn add_new_bubbles(
 //     }
 // }
 
+#[no_mangle]
 fn spawn_bubble(
     commands: &mut Commands,
     owner: Entity,

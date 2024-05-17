@@ -1326,6 +1326,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "components"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "iyes_perf_ui",
+ "rand",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3132,6 +3141,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "systems"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "components",
+ "iyes_perf_ui",
+ "rand",
+]
+
+[[package]]
 name = "taffy"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3370,8 +3389,10 @@ name = "walk-n-talk-rs"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "components",
  "iyes_perf_ui",
  "rand",
+ "systems",
 ]
 
 [[package]]

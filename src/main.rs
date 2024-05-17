@@ -1,22 +1,15 @@
-mod animation;
-mod debug;
-mod interaction;
-mod movable;
-mod npc;
-mod person;
-mod player;
-mod speech_bubble;
-
 use bevy::{prelude::*, window::WindowResolution};
 
-use animation::AnimationPlugin;
-use debug::DebugPlugin;
-use interaction::InteractionPlugin;
-use movable::MovablePlugin;
-use npc::NpcPlugin;
-use person::PersonPlugin;
-use player::{Player, PlayerPlugin};
-use speech_bubble::SpeechBubblePlugin;
+use systems::animation::AnimationPlugin;
+use systems::background::BackgroundPlugin;
+use systems::camera::CameraPlugin;
+use systems::debug::DebugPlugin;
+use systems::interaction::InteractionPlugin;
+use systems::movable::MovablePlugin;
+use systems::npc::NpcPlugin;
+use systems::person::PersonPlugin;
+use systems::player::PlayerPlugin;
+use systems::speech_bubble::SpeechBubblePlugin;
 
 fn main() {
     App::new()
@@ -32,6 +25,8 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
         )
+        .add_plugins(BackgroundPlugin)
+        .add_plugins(CameraPlugin)
         .add_plugins(AnimationPlugin)
         .add_plugins(MovablePlugin)
         .add_plugins(PersonPlugin)
@@ -40,46 +35,5 @@ fn main() {
         .add_plugins(InteractionPlugin)
         .add_plugins(SpeechBubblePlugin)
         .add_plugins(DebugPlugin)
-        .add_systems(Startup, setup)
-        .add_systems(PostUpdate, update_camera_position)
         .run()
-}
-
-const BACKROUND_SCALE: f32 = 4.;
-
-#[derive(Component)]
-struct Background;
-
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let origin_transform = Transform::from_xyz(0., 18., -10.);
-    let mut camera = Camera2dBundle::default();
-    camera.transform = origin_transform;
-    commands.spawn(camera);
-
-    commands.spawn((
-        Background,
-        ImageScaleMode::Tiled {
-            tile_x: true,
-            tile_y: false,
-            stretch_value: 1. / BACKROUND_SCALE,
-        },
-        SpriteBundle {
-            texture: asset_server.load("background.png"),
-            transform: origin_transform.with_scale(Vec3 {
-                x: BACKROUND_SCALE,
-                y: 1.,
-                z: 1.,
-            }),
-            ..default()
-        },
-    ));
-}
-
-fn update_camera_position(
-    mut query: Query<&mut Transform, With<Camera>>,
-    player_query: Query<&Transform, (With<Player>, Without<Camera>)>,
-) {
-    let player_transform = player_query.single();
-    let mut camera_transform = query.single_mut();
-    camera_transform.translation.x = player_transform.translation.x;
 }
