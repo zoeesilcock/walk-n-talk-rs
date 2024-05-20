@@ -11,11 +11,19 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.13.2", features = ["dynamic_linking"] }
-iyes_perf_ui = "0.2.3"
-rand = "0.8.5"
+bevy = "0.13.2"
 components = { path = "components" }
 systems = { path = "systems" }
+hot-lib-reloader = { version = "0.7.0", optional = true }
+
+[features]
+default = []
+dynamic = ["bevy/dynamic_linking"]
+reload = [
+  "dep:hot-lib-reloader",
+  "components/dynamic",
+  "bevy/dynamic_linking",
+]
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
